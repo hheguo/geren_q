@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "auth-modal": "../../components/auth-modal/auth-modal"
+  },
+  "navigationBarTitleText": "加入房间"
+}

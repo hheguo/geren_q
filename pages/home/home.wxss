@@ -1,0 +1,47 @@
+.container {
+  position: relative;
+  z-index: 1;
+  padding: 0 40rpx;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12rpx;
+}
+
+.logo-icon {
+  font-size: 72rpx;
+  margin-right: 12rpx;
+  animation: tileFloat 3s ease-in-out infinite;
+}
+
+@keyframes tileFloat {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-8rpx) rotate(3deg); }
+}
+
+.logo-text {
+  font-size: 72rpx;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -2rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #94a3b8;
+  letter-spacing: 4rpx;
+}

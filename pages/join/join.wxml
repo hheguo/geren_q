@@ -1,0 +1,36 @@
+<view class="page-enter">
+  <view class="container">
+    <view class="card">
+      <view class="card-title">🚪 加入房间</view>
+
+      <!-- 昵称 -->
+      <view class="input-group">
+        <text class="input-label">你的昵称</text>
+        <input class="input-field" value="{{nickname}}" bindinput="onNicknameInput"
+               placeholder="请输入昵称" placeholder-class="placeholder-cls" maxlength="12" />
+      </view>
+
+      <!-- 房间号 -->
+      <view class="input-group">
+        <text class="input-label">房间号</text>
+        <input class="input-field room-code-input" type="number"
+               bindinput="onCodeInput" placeholder="0000" placeholder-class="placeholder-cls" maxlength="4" />
+      </view>
+
+      <!-- 加入按钮 -->
+      <button class="btn btn-primary {{loading ? 'btn-disabled' : ''}}" bindtap="doJoin" style="margin-top: 16rpx;">
+        {{loading ? '加入中…' : '加入房间'}}
+      </button>
+    </view>
+  </view>
+
+  <auth-modal show="{{showLogin}}" bind:success="onLoginSuccess" bind:cancel="onLoginCancel" />
+
+  <!-- 加载遮罩 -->
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在加入房间…</text>
+    </view>
+  </view>
+</view>

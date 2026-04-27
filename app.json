@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/records/records",
+    "pages/create/create",
+    "pages/join/join",
+    "pages/room/room",
+    "pages/history/history",
+    "pages/profile/profile",
+    "pages/bill/bill",
+    "pages/room-list/room-list"
+  ],
+  "tabBar": {
+    "color": "#64748b",
+    "selectedColor": "#818cf8",
+    "backgroundColor": "#111827",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/records/records",
+        "text": "记录",
+        "iconPath": "images/tab-home.png",
+        "selectedIconPath": "images/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tab-profile.png",
+        "selectedIconPath": "images/tab-profile-active.png"
+      }
+    ]
+  },
+  "window": {
+    "navigationBarBackgroundColor": "#0a0e1a",
+    "navigationBarTitleText": "TenpAI",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0a0e1a",
+    "backgroundTextStyle": "light"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,171 @@
+<view class="page-enter">
+  <view class="container">
+
+    <!-- 房间号展示 -->
+    <!-- 房间号展示 (改为二维码) -->
+    <view class="card room-code-card">
+      <view class="qr-container">
+        <!-- 如果 base64 图片存在则显示，否则显示加载占位或重试 -->
+        <image class="room-qrcode" src="{{qrCodeImage}}" mode="aspectFit" wx:if="{{qrCodeImage}}"></image>
+        <view class="room-qrcode loading-qr" wx:else>加载中...</view>
+      </view>
+      <text class="code-hint">微信扫一扫加入</text>
+      
+      <view class="code-actions">
+        <button class="btn btn-sm btn-primary" open-type="share" style="width:240rpx;">邀请好友</button>
+      </view>
+    </view>
+
+    <!-- 积分榜 -->
+    <view class="card">
+      <view class="board-header">
+        <text class="board-title">积分榜</text>
+        <view class="board-meta">
+          <text class="round-badge">第 {{roundCount + 1}} 局</text>
+          <text class="status-badge {{isEnded ? 'status-ended' : 'status-active'}}">
+            {{isEnded ? '已结束' : '● 进行中'}}
+          </text>
+        </view>
+      </view>
+
+      <view class="rule-chips" wx:if="{{baseScore}}">
+        <text class="rule-chip">底分: {{baseScore}}</text>
+      </view>
+
+      <!-- 玩家列表 -->
+      <view class="player-list">
+        <view class="player-card {{index === 0 && item.score > 0 ? 'rank-first' : ''}}"
+              wx:for="{{rankedPlayers}}" wx:key="id"
+              style="animation-delay: {{index * 0.06}}s;">
+          <view class="player-avatar">{{item.initial}}</view>
+          <view class="player-info">
+            <text class="player-name">{{item.name}}</text>
+            <text class="player-rank">{{index === 0 ? '👑 第1名' : '第' + (index + 1) + '名'}}</text>
+          </view>
+          <text class="player-score {{item.score > 0 ? 'text-positive' : item.score < 0 ? 'text-negative' : 'text-zero'}}">
+            {{item.scoreText}}
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-row" wx:if="{{!isEnded}}">
+      <button class="btn btn-primary action-btn" bindtap="openScoreModal">
+        <text>📝 记一局</text>
+      </button>
+      <button class="btn btn-secondary action-btn" bindtap="goHistory">
+        <text>📊 历史</text>
+      </button>
+    </view>
+    <view class="action-row" wx:else>
+      <button class="btn btn-secondary action-btn" bindtap="goHistory">
+        <text>📊 历史</text>
+      </button>
+    </view>
+
+    <view class="sub-actions" wx:if="{{!isEnded}}">
+      <button class="btn btn-sm btn-secondary" bindtap="editPlayers" style="flex:1;">✏️ 编辑玩家</button>
+      <button class="btn btn-sm btn-danger" bindtap="endRoom" style="flex:1;">🏁 结束房间</button>
+    </view>
+    <view class="sub-actions" wx:else>
+      <button class="btn btn-primary" bindtap="newRoom" style="flex:1;">🎲 再来一局</button>
+    </view>
+
+  </view>
+
+  <!-- ========== 记分弹窗 - 胜/负 + 自动计算 ========== -->
+  <view class="modal-overlay {{showScoreModal ? 'show' : ''}}" bindtap="closeScoreModal">
+    <view class="modal" catchtap="preventClose">
+      <view class="modal-handle"></view>
+      <text class="modal-title">📝 第 {{roundCount + 1}} 圈</text>
+
+      <!-- 表头 -->
+      <view class="score-header">
+        <text class="sh-name">名称</text>
+        <text class="sh-result">胜负</text>
+        <text class="sh-point">得分</text>
+      </view>
+
+      <!-- 玩家得分行 -->
+      <view class="score-row" wx:for="{{scoreData}}" wx:key="id">
+        <text class="score-name">{{item.name}}</text>
+        <view class="result-toggle" wx:if="{{!item.isTaiban}}">
+          <view class="radio-opt {{item.result === 'win' ? 'radio-active-win' : ''}}"
+                bindtap="setResult" data-index="{{index}}" data-result="win">
+            <view class="radio-dot {{item.result === 'win' ? 'dot-active-win' : ''}}"></view>
+            <text>胜</text>
+          </view>
+          <view class="radio-opt {{item.result === 'lose' ? 'radio-active-lose' : ''}}"
+                bindtap="setResult" data-index="{{index}}" data-result="lose">
+            <view class="radio-dot {{item.result === 'lose' ? 'dot-active-lose' : ''}}"></view>
+            <text>负</text>
+          </view>
+        </view>
+        <view class="result-toggle" wx:else>
+           <text style="font-size:24rpx; color:#64748b;">(自动计算)</text>
+        </view>
+        <input class="score-input"
+               style="color: {{item.score >= 0 ? '#ef4444' : '#4ade80'}} !important;"
+               type="text"
+               value="{{item.displayScore}}"
+               data-index="{{index}}" 
+               bindinput="onScoreInput"
+               bindblur="onScoreBlur"
+               placeholder="0" placeholder-class="placeholder-cls" />
+      </view>
+
+      <view class="btn-group" style="margin-top: 32rpx;">
+        <button class="btn btn-primary" bindtap="submitScore">确认提交</button>
+        <button class="btn btn-secondary" bindtap="closeScoreModal">取消</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 编辑玩家弹窗 ========== -->
+  <view class="modal-overlay {{showEditModal ? 'show' : ''}}" bindtap="closeEditModal">
+    <view class="modal" catchtap="preventClose">
+      <view class="modal-handle"></view>
+      <text class="modal-title">✏️ 编辑玩家</text>
+
+      <view class="edit-player-item" wx:for="{{players}}" wx:key="id">
+        <view class="player-avatar small-avatar">{{item.name[0]}}</view>
+        <input class="input-field edit-name-input" value="{{item.name}}"
+               data-index="{{index}}" bindinput="onEditName" maxlength="8"
+               placeholder="玩家名" placeholder-class="placeholder-cls" />
+        <view class="remove-btn" bindtap="removePlayer" data-index="{{index}}" wx:if="{{item.canRemove}}">✕</view>
+      </view>
+
+      <view class="add-player-btn" bindtap="addPlayer" wx:if="{{players.length < 8}}">
+        ＋ 添加玩家
+      </view>
+
+      <view class="btn-group" style="margin-top: 24rpx;">
+        <button class="btn btn-primary" bindtap="saveEdit">保存</button>
+        <button class="btn btn-secondary" bindtap="closeEditModal">取消</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 邀请弹窗 ========== -->
+  <view class="modal-overlay {{showInviteModal ? 'show' : ''}}" bindtap="closeInvite">
+    <view class="modal" catchtap="preventClose">
+      <view class="modal-handle"></view>
+      <text class="modal-title">📲 邀请好友</text>
+
+      <!-- 纯 view 邀请卡 — 不用 canvas -->
+      <view class="invite-card">
+        <text class="invite-label">房间号</text>
+        <text class="invite-code">{{roomCode}}</text>
+        <view class="invite-divider"></view>
+        <text class="invite-brand">🀄 TenpAI 麻将记分</text>
+        <text class="invite-tip">转发给好友即可加入</text>
+      </view>
+
+      <view class="btn-group" style="margin-top: 24rpx;">
+        <button class="btn btn-primary" open-type="share">转发给好友</button>
+        <button class="btn btn-secondary" bindtap="closeInvite">关闭</button>
+      </view>
+    </view>
+  </view>
+</view>

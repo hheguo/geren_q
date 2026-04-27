@@ -1,0 +1,49 @@
+<view class="container {{theme}}">
+  <view class="header">
+    <view class="filter-bar">
+      <view class="time-range">
+        <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+          <view class="picker">{{startDate || '开始日期'}}</view>
+        </picker>
+        <text class="separator">至</text>
+        <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+          <view class="picker">{{endDate || '结束日期'}}</view>
+        </picker>
+      </view>
+      
+      <view class="type-switch">
+        <view class="type-btn {{type === 'day' ? 'active' : ''}}" bindtap="switchType" data-type="day">按日</view>
+        <view class="type-btn {{type === 'month' ? 'active' : ''}}" bindtap="switchType" data-type="month">按月</view>
+      </view>
+    </view>
+
+    <view class="summary-card">
+      <view class="summary-item">
+        <text class="label">总盈亏</text>
+        <text class="value {{totalScore >= 0 ? 'win' : 'lose'}}">{{totalScore > 0 ? '+' : ''}}{{totalScore}}</text>
+      </view>
+      <view class="divider"></view>
+      <view class="summary-item">
+        <text class="label">总局数</text>
+        <text class="value">{{totalCount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="list-container">
+    <view class="list-item" wx:for="{{list}}" wx:key="date">
+      <view class="date-info">
+        <text class="date">{{item.date}}</text>
+        <text class="weekday">{{item.weekday || ''}}</text>
+      </view>
+      <view class="stats-info">
+        <text class="count">{{item.roundCount}} 局</text>
+        <text class="score {{item.totalScore >= 0 ? 'win' : 'lose'}}">{{item.totalScore > 0 ? '+' : ''}}{{item.totalScore}}</text>
+      </view>
+    </view>
+    
+    <view class="empty" wx:if="{{list.length === 0}}">
+      <text>暂无数据</text>
+    </view>
+  </scroll-view>
+</view>

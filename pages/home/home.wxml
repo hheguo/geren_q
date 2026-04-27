@@ -1,0 +1,26 @@
+<view class="page-enter">
+  <!-- 背景光球 -->
+  <view class="bg-orb bg-orb-1"></view>
+  <view class="bg-orb bg-orb-2"></view>
+
+  <view class="container">
+    <!-- Logo -->
+    <view class="header">
+      <view class="logo-row">
+        <text class="logo-icon">🀄</text>
+        <text class="logo-text">TenpAI</text>
+      </view>
+      <text class="subtitle">麻将记分助手</text>
+    </view>
+
+    <!-- 主按钮 -->
+    <view class="btn-group" style="margin-top: 60rpx;">
+      <button class="btn btn-primary" bindtap="goCreate">
+        <text class="btn-icon">🎲</text>
+        <text>创建房间</text>
+      </button>
+    </view>
+
+
+  </view>
+</view>

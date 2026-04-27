@@ -1,0 +1,74 @@
+<view class="page-container">
+  <view class="tabs">
+    <view class="tab-item {{activeTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-tab="0">
+      进行中
+      <view class="tab-line" wx:if="{{activeTab === 0}}"></view>
+    </view>
+    <view class="tab-item {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-tab="1">
+      已结束
+      <view class="tab-line" wx:if="{{activeTab === 1}}"></view>
+    </view>
+  </view>
+
+  <view class="content">
+    <!-- 进行中列表 -->
+    <view wx:if="{{activeTab === 0}}" class="room-list">
+      <block wx:if="{{ongoingRooms.length > 0}}">
+        <view class="room-card" wx:for="{{ongoingRooms}}" wx:key="id" bindtap="goRoom" data-code="{{item.roomCode}}">
+          <view class="card-header">
+            <view class="room-info">
+                <!-- 结构化显示分数 -->
+                <view class="stats-row" wx:if="{{item.playerStats && item.playerStats.length > 0}}">
+                    <view class="stat-item" wx:for="{{item.playerStats}}" wx:for-item="p" wx:key="name">
+                        <text class="stat-name">{{p.name}}</text>
+                        <text class="stat-score" style="color: {{p.color}};">{{p.text}}</text>
+                    </view>
+                </view>
+                <text class="room-code" wx:else>房间: {{item.roomCode}}</text>
+            </view>
+            <text class="tag-live">● 进行中</text>
+          </view>
+          <view class="card-body">
+            <text class="info-text" wx:if="{{item.scoreMode === 1}}">模式: 台版</text>
+            <text class="info-text" wx:else>模式: 普通</text>
+            <text class="info-time">{{item.createTime}}</text>
+          </view>
+          <view class="card-footer">
+            <text class="btn-text">点击进入 >></text>
+          </view>
+        </view>
+      </block>
+      <view wx:else class="empty-state">
+        <text>暂无进行中的房间</text>
+      </view>
+    </view>
+
+    <!-- 已结束列表 -->
+    <view wx:if="{{activeTab === 1}}" class="room-list">
+      <block wx:if="{{endedRooms.length > 0}}">
+        <view class="room-card card-ended" wx:for="{{endedRooms}}" wx:key="id" bindtap="goHistory" data-code="{{item.roomCode}}">
+          <view class="card-header">
+            <view class="room-info">
+                <view class="stats-row" wx:if="{{item.playerStats && item.playerStats.length > 0}}">
+                    <view class="stat-item" wx:for="{{item.playerStats}}" wx:for-item="p" wx:key="name">
+                        <text class="stat-name">{{p.name}}</text>
+                        <text class="stat-score" style="color: {{p.color}};">{{p.text}}</text>
+                    </view>
+                </view>
+                <text class="room-code" wx:else>房间: {{item.roomCode}}</text>
+            </view>
+            <text class="tag-ended">已结束</text>
+          </view>
+           <view class="card-body">
+            <text class="info-text" wx:if="{{item.scoreMode === 1}}">模式: 台版</text>
+            <text class="info-text" wx:else>模式: 普通</text>
+            <text class="info-time">{{item.createTime}}</text>
+          </view>
+        </view>
+      </block>
+      <view wx:else class="empty-state">
+        <text>暂无历史记录</text>
+      </view>
+    </view>
+  </view>
+</view>

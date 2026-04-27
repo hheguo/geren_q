@@ -1,0 +1,26 @@
+<view class="page-enter">
+  <view class="container">
+    <view class="card">
+      <view class="card-title">📊 历史记录</view>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{records.length === 0}}">
+        <text class="empty-icon">📭</text>
+        <text class="empty-text">暂无记录\n记完第一局就能看到了</text>
+      </view>
+
+      <!-- 记录列表 -->
+      <view class="history-list" wx:else>
+        <view class="history-item" wx:for="{{records}}" wx:key="index"
+              style="animation-delay: {{index * 0.04}}s;">
+          <text class="history-round">第 {{item.roundNumber}} 局</text>
+          <view class="history-scores">
+            <view class="score-chip {{entry.cls}}" wx:for="{{item.scoreEntries}}" wx:for-item="entry" wx:key="name">
+              <text>{{entry.name}}: {{entry.text}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,29 @@
+<view class="container {{theme}}">
+  <view class="header">
+    <view class="title">📋 历史房间记录</view>
+  </view>
+
+  <view class="history-list">
+    <view class="empty-state" wx:if="{{roomHistory.length === 0}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">暂无历史记录</text>
+    </view>
+
+    <view class="history-item" wx:for="{{roomHistory}}" wx:key="index"
+          style="animation-delay: {{index * 0.05}}s;">
+      <view class="hi-header">
+        <text class="hi-code">房间 {{item.roomCode}}</text>
+        <text class="hi-time text-muted">{{item.timeText}}</text>
+      </view>
+      <view class="hi-players">
+        <view class="hi-player" wx:for="{{item.players}}" wx:for-item="p" wx:key="name">
+          <text class="hp-name">{{p.name}}</text>
+          <text class="hp-score {{p.score > 0 ? 'text-positive' : p.score < 0 ? 'text-negative' : 'text-zero'}}">
+            {{p.score > 0 ? '+' : ''}}{{p.score}}
+          </text>
+        </view>
+      </view>
+      <text class="hi-rounds text-secondary">共 {{item.recordCount}} 局</text>
+    </view>
+  </view>
+</view>

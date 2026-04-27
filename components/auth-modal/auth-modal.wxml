@@ -1,0 +1,28 @@
+
+<view class="modal-overlay {{show ? 'show' : ''}}">
+  <view class="modal">
+    <view class="modal-header">
+      <text class="modal-title">🔐 登录 TenpAI</text>
+      <text class="modal-subtitle">需要登录后才能创建或加入房间</text>
+    </view>
+
+    <view class="form-content">
+      <button class="btn-avatar" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar-img" src="{{avatarUrl}}" wx:if="{{avatarUrl}}" />
+        <text wx:else>点击选择头像</text>
+      </button>
+
+      <view class="input-row">
+        <text class="label">昵称</text>
+        <input class="input" type="nickname" placeholder="点击获取微信昵称" 
+               value="{{nickname}}" bindinput="onNicknameInput" bindblur="onNicknameBlur" />
+      </view>
+
+      <button class="btn-primary {{loading ? 'disabled' : ''}}" bindtap="doLogin">
+        {{loading ? '登录中...' : '确认登录'}}
+      </button>
+      
+      <view class="btn-cancel" bindtap="onCancel">暂不登录</view>
+    </view>
+  </view>
+</view>
