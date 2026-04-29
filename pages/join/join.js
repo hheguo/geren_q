@@ -25,9 +25,16 @@ Page({
     if (this.data.loading) return;
     
     // 1. 基础校验
-    const roomCode = this.data.roomCode || '';
-    if (roomCode.length !== 4) {
-      app.showToast('请输入4位房间号');
+    const roomCode = (this.data.roomCode || '').trim();
+    if (!roomCode) {
+      app.showToast('请输入邀请码');
+      return;
+    }
+    // 兼容历史 UUID 房间 + 新版 6 位邀请码
+    const isInviteCode = /^\d{6}$/.test(roomCode);
+    const isLegacyUuid = /^[a-fA-F0-9]{32}$/.test(roomCode);
+    if (!isInviteCode && !isLegacyUuid) {
+      app.showToast('请输入6位邀请码');
       return;
     }
 

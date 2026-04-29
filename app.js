@@ -69,7 +69,7 @@ App({
   },
 
   generateRoomCode() {
-    return String(Math.floor(1000 + Math.random() * 9000));
+    return String(Math.floor(100000 + Math.random() * 900000));
   },
 
   initPlayers(count, ownerName, ownerId) {

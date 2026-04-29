@@ -10,11 +10,11 @@
                placeholder="请输入昵称" placeholder-class="placeholder-cls" maxlength="12" />
       </view>
 
-      <!-- 房间号 -->
+      <!-- 房间邀请码 -->
       <view class="input-group">
-        <text class="input-label">房间号</text>
-        <input class="input-field room-code-input" type="number"
-               bindinput="onCodeInput" placeholder="0000" placeholder-class="placeholder-cls" maxlength="4" />
+        <text class="input-label">邀请码</text>
+        <input class="input-field room-code-input"
+               bindinput="onCodeInput" placeholder="请输入6位邀请码" placeholder-class="placeholder-cls" maxlength="64" />
       </view>
 
       <!-- 加入按钮 -->

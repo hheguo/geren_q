@@ -155,9 +155,6 @@
 
       <!-- 纯 view 邀请卡 — 不用 canvas -->
       <view class="invite-card">
-        <text class="invite-label">房间号</text>
-        <text class="invite-code">{{roomCode}}</text>
-        <view class="invite-divider"></view>
         <text class="invite-brand">🀄 TenpAI 麻将记分</text>
         <text class="invite-tip">转发给好友即可加入</text>
       </view>

@@ -19,14 +19,15 @@ Page({
     }
 
     this.setData({ roomCode: code });
-    if(code) {
+    if (code) {
+      this.loadRoomByCode(code);
       this.fetchRoomQRCode(code);
     }
   },
 
   onShareAppMessage() {
       return {
-          title: `邀请你加入麻将记分房间 [${this.data.roomCode}]`,
+          title: '邀请你加入 TenpAI 麻将记分房间',
           path: `/pages/room/room?code=${this.data.roomCode}`,
           imageUrl: '/assets/invite_cover.png' // Optional: create a default cover or remove
       };
@@ -34,19 +35,51 @@ Page({
 
   onShareTimeline() {
       return {
-          title: `麻将记分房间 [${this.data.roomCode}]`,
+          title: 'TenpAI 麻将记分房间',
           query: `code=${this.data.roomCode}`
       };
+  },
+
+  async loadRoomByCode(roomCode) {
+    try {
+      const detail = await app.request(`/room/${roomCode}`, { method: 'GET' });
+      const room = detail && detail.room ? detail.room : null;
+      if (!room) return;
+
+      app.globalData.currentRoom = room;
+      app.globalData.records = Array.isArray(detail.records) ? detail.records : [];
+      app.globalData.players = this.parsePlayers(room.players);
+      this.refreshData();
+    } catch (err) {
+      console.error('Load room failed', err);
+      app.showToast(err.message || '进入房间失败');
+    }
+  },
+
+  parsePlayers(playersJson) {
+    if (!playersJson) return [];
+    try {
+      const list = JSON.parse(playersJson);
+      if (!Array.isArray(list)) return [];
+      return list.map((p, index) => ({
+        id: p.id,
+        name: p.name || `玩家${index + 1}`,
+        avatar: p.avatar || '',
+        score: 0
+      }));
+    } catch (e) {
+      return [];
+    }
   },
 
   onShow() {
     this.refreshData();
   },
 
-  fetchRoomQRCode(uuid) {
+  fetchRoomQRCode(code) {
     app.request('/room/qrcode', {
       method: 'GET',
-      data: { uuid }
+      data: { code }
     }).then(base64 => {
       this.setData({ qrCodeImage: base64 });
     }).catch(err => {

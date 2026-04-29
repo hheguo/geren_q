@@ -79,10 +79,22 @@ Page({
 
       app.globalData.currentRoom = room;
       app.initPlayers(playerCount, name, app.globalData.userId);
+      // 创建后立即同步玩家，确保被邀请者可以恢复玩家列表
+      app.request('/room/update', {
+        method: 'POST',
+        data: {
+          id: room.id,
+          players: JSON.stringify(app.globalData.players.map(p => ({
+            id: String(p.id),
+            name: p.name,
+            avatar: p.avatar || ''
+          })))
+        }
+      }).catch(() => {});
 
       this.setData({ loading: false });
       
-      // 使用后端返回的 roomCode (UUID)
+      // 使用后端返回的邀请码
       wx.navigateTo({
         url: `/pages/room/room?code=${room.roomCode}`
       });
@@ -91,7 +103,7 @@ Page({
       // 离线模式暂不支持台版逻辑的完整后端特性，但在前端可以模拟
       app.globalData.currentRoom = {
         id: Date.now(),
-        roomCode: app.generateRoomCode(), // 离线还是用短码? 或者也模拟 UUID? 这里先保留短码
+        roomCode: app.generateRoomCode(), // 离线模式下使用 6 位邀请码
         ownerId: 1,
         status: 0,
         rules,
