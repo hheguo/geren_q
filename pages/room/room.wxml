@@ -165,4 +165,6 @@
       </view>
     </view>
   </view>
+
+  <auth-modal show="{{showLogin}}" bind:success="onLoginSuccess" bind:cancel="onLoginCancel" />
 </view>

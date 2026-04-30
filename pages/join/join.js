@@ -21,6 +21,61 @@ Page({
     this.data.roomCode = e.detail.value;
   },
 
+  parsePlayers(playersJson) {
+    if (!playersJson) return [];
+    try {
+      const list = JSON.parse(playersJson);
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async syncJoinedPlayer(roomCode) {
+    try {
+      const detail = await app.request(`/room/${roomCode}`, { method: 'GET' });
+      const room = detail && detail.room ? detail.room : null;
+      if (!room || !room.id) return;
+
+      const players = this.parsePlayers(room.players);
+      const currentUserId = String(app.globalData.userId);
+      const hasCurrentUser = players.some(p => String(p.id) === currentUserId);
+
+      if (!hasCurrentUser) {
+        players.push({
+          id: currentUserId,
+          name: app.globalData.nickname || '玩家',
+          avatar: app.globalData.avatarUrl || ''
+        });
+      }
+
+      app.globalData.currentRoom = room;
+      app.globalData.players = players.map((p, index) => ({
+        id: p.id,
+        name: p.name || `玩家${index + 1}`,
+        avatar: p.avatar || '',
+        score: 0
+      }));
+
+      if (!hasCurrentUser) {
+        await app.request('/room/update', {
+          method: 'POST',
+          data: {
+            id: room.id,
+            players: JSON.stringify(players.map(p => ({
+              id: String(p.id),
+              name: p.name || '玩家',
+              avatar: p.avatar || ''
+            })))
+          }
+        });
+      }
+    } catch (e) {
+      // 降级：允许继续进入房间，房间页会再尝试加载
+      console.warn('syncJoinedPlayer failed', e);
+    }
+  },
+
   async doJoin() {
     if (this.data.loading) return;
     
@@ -63,6 +118,7 @@ Page({
       // 初始化玩家数据
       const name = app.globalData.nickname || '玩家';
       app.initPlayers(playerCount, name, app.globalData.userId);
+      await this.syncJoinedPlayer(room.roomCode);
       
       this.setData({ loading: false });
       

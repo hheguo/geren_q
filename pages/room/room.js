@@ -8,9 +8,10 @@ Page({
     roundCount: 0, // Initialize to avoid NaN
     baseScore: 1,
     isEnded: false,
+    showLogin: false
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     let code = options.code || options.uuid || '';
     
     // Handle WeChat QR Code scan (scene parameter)
@@ -19,10 +20,8 @@ Page({
     }
 
     this.setData({ roomCode: code });
-    if (code) {
-      this.loadRoomByCode(code);
-      this.fetchRoomQRCode(code);
-    }
+    if (!code) return;
+    await this.enterRoomFlow(code);
   },
 
   onShareAppMessage() {
@@ -40,11 +39,16 @@ Page({
       };
   },
 
-  async loadRoomByCode(roomCode) {
+  async loadRoomByCode(roomCode, silent) {
+    if (this._loadingRoomDetail) return;
+    this._loadingRoomDetail = true;
     try {
       const detail = await app.request(`/room/${roomCode}`, { method: 'GET' });
       const room = detail && detail.room ? detail.room : null;
-      if (!room) return;
+      if (!room) {
+        this._loadingRoomDetail = false;
+        return;
+      }
 
       app.globalData.currentRoom = room;
       app.globalData.records = Array.isArray(detail.records) ? detail.records : [];
@@ -52,8 +56,80 @@ Page({
       this.refreshData();
     } catch (err) {
       console.error('Load room failed', err);
-      app.showToast(err.message || '进入房间失败');
+      if (!silent) {
+        app.showToast(err.message || '进入房间失败');
+      }
+    } finally {
+      this._loadingRoomDetail = false;
     }
+  },
+
+  parsePlayersRaw(playersJson) {
+    if (!playersJson) return [];
+    try {
+      const list = JSON.parse(playersJson);
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async syncJoinedPlayer(roomCode) {
+    try {
+      const detail = await app.request(`/room/${roomCode}`, { method: 'GET' });
+      const room = detail && detail.room ? detail.room : null;
+      if (!room || !room.id) return;
+
+      const players = this.parsePlayersRaw(room.players);
+      const currentUserId = String(app.globalData.userId);
+      const hasCurrentUser = players.some(p => String(p.id) === currentUserId);
+
+      if (!hasCurrentUser) {
+        players.push({
+          id: currentUserId,
+          name: app.globalData.nickname || '玩家',
+          avatar: app.globalData.avatarUrl || ''
+        });
+      }
+
+      if (!hasCurrentUser) {
+        await app.request('/room/update', {
+          method: 'POST',
+          data: {
+            id: room.id,
+            players: JSON.stringify(players.map(p => ({
+              id: String(p.id),
+              name: p.name || '玩家',
+              avatar: p.avatar || ''
+            })))
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('syncJoinedPlayer failed', e);
+    }
+  },
+
+  async enterRoomFlow(roomCode) {
+    if (!app.globalData.isLoggedIn) {
+      this.setData({ showLogin: true });
+      return;
+    }
+
+    try {
+      // 标记加入关系（后端若已处理会幂等）
+      await app.request('/room/join', {
+        method: 'POST',
+        data: { roomCode }
+      });
+    } catch (e) {
+      // 不阻断：继续拉详情，兼容部分环境 join 接口行为差异
+      console.warn('room join failed', e);
+    }
+
+    await this.syncJoinedPlayer(roomCode);
+    await this.loadRoomByCode(roomCode);
+    this.fetchRoomQRCode(roomCode);
   },
 
   parsePlayers(playersJson) {
@@ -73,7 +149,48 @@ Page({
   },
 
   onShow() {
+    if (!app.globalData.isLoggedIn) {
+      this.stopRoomPolling();
+      return;
+    }
+    if (this.data.roomCode) {
+      this.loadRoomByCode(this.data.roomCode, true);
+    }
+    this.startRoomPolling();
     this.refreshData();
+  },
+
+  onHide() {
+    this.stopRoomPolling();
+  },
+
+  onUnload() {
+    this.stopRoomPolling();
+  },
+
+  onLoginSuccess() {
+    this.setData({ showLogin: false });
+    if (this.data.roomCode) {
+      this.enterRoomFlow(this.data.roomCode);
+    }
+  },
+
+  onLoginCancel() {
+    this.setData({ showLogin: false });
+    wx.navigateBack();
+  },
+
+  startRoomPolling() {
+    if (this._roomPollTimer || !this.data.roomCode) return;
+    this._roomPollTimer = setInterval(() => {
+      this.loadRoomByCode(this.data.roomCode, true);
+    }, 3000);
+  },
+
+  stopRoomPolling() {
+    if (!this._roomPollTimer) return;
+    clearInterval(this._roomPollTimer);
+    this._roomPollTimer = null;
   },
 
   fetchRoomQRCode(code) {
