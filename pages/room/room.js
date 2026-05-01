@@ -52,7 +52,9 @@ Page({
 
       app.globalData.currentRoom = room;
       app.globalData.records = Array.isArray(detail.records) ? detail.records : [];
-      app.globalData.players = this.parsePlayers(room.players);
+      const players = this.parsePlayers(room.players);
+      this.applyRecordsToPlayerScores(players, app.globalData.records);
+      app.globalData.players = players;
       this.refreshData();
     } catch (err) {
       console.error('Load room failed', err);
@@ -146,6 +148,29 @@ Page({
     } catch (e) {
       return [];
     }
+  },
+
+  /** 根据对局记录汇总每位玩家总分（与轮询拉取详情配合，避免总分一直被重置为 0） */
+  applyRecordsToPlayerScores(players, records) {
+    const totals = {};
+    (records || []).forEach(r => {
+      let scores = {};
+      try {
+        scores = typeof r.scores === 'string' ? JSON.parse(r.scores || '{}') : (r.scores || {});
+      } catch (e) {
+        scores = {};
+      }
+      Object.keys(scores).forEach(pid => {
+        const key = String(pid);
+        const v = Number(scores[pid]);
+        if (!Number.isNaN(v)) totals[key] = (totals[key] || 0) + v;
+      });
+    });
+    players.forEach(p => {
+      const key = String(p.id);
+      p.score = Object.prototype.hasOwnProperty.call(totals, key) ? totals[key] : 0;
+    });
+    return players;
   },
 
   onShow() {
@@ -499,7 +524,7 @@ Page({
     const players = app.globalData.players;
     const scoreMap = {};
     scoreData.forEach(p => {
-      const player = players.find(pp => pp.id === p.id);
+      const player = players.find(pp => String(pp.id) === String(p.id));
       if (player) {
         player.score += p.score;
       }
